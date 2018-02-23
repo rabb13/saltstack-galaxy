@@ -1,0 +1,162 @@
+#------------------------------------
+#Minimal Installation-
+roles:
+  - galaxy
+# This will create galaxy instance using sqllite database listening on http://localhost:8080
+#------------------------------------
+
+
+# Advanced installation-
+roles:
+  - postgres
+  - galaxy
+  - galaxy.toolinstaller
+
+galaxy:
+  home: /srv/galaxyproject
+  archive_url: 'https://github.com/galaxyproject/galaxy/archive/'
+  version: "17.09"
+  log_dir: "/var/log/galaxy"
+  source_profile: "/path/to/activate" # Usefull for load cluster profiles
+  user: # optional, usefull when matching with cluser
+    uid: 1000
+    gid: 1001
+  # Update variables here if you want use your own python repo
+  venv:
+    index_url: "https://pypi.python.org/simple"
+    extra_index_url: "https://wheels.galaxyproject.org/simple"
+    pip:                                      # do not add extra_index_url under pip
+      timeout: 60
+      index-url: "https://pypi.python.org/simple"
+      find-links: "https://wheels.galaxyproject.org/simple"
+  # Galaxy server configs
+  config:
+    server:
+      host: 0.0.0.0
+      port: 8080
+    app:
+      database_connection: postgresql://username:password@hostname/galaxydatabase  # this will disable local sqlite db
+      use_interactive: False                     # set false for production
+      debug: False                               # set false for production
+    amqp:
+      host = 127.0.0.1
+  # Galaxy Authentication sources
+  auth:
+    localdb:
+      enabled: True
+      allow_password_change: True
+    ldap:
+      enabled: true
+      filter: "'{email}'"
+      options:
+        server: "ldap://ldap.lan"
+        ldap_type: OpenLDAP                        # Choices are "OpenLDAP" or "AD", this has no impact
+        allow-register: Challenge
+        auto-register: True
+        allow-password-change: False
+        login-use-username: False
+        continue-on-failure: True
+        search-fields:
+        search-base:
+        search-filter:
+        search-user:
+        search-password:
+        bind-user:
+        bind-password:
+        auto-register-username:
+        auto-register-email:
+  # if customise_localtools = True, and added the lists here. it will list locally installed tools in interface (it does not add new)
+  customise_localtools: True
+  localtools:
+    getext:
+      tool_name: "Get Data"
+      tools:
+        - '<tool file="data_source/upload.xml" />'
+        - '<tool file="data_source/ucsc_tablebrowser.xml" />'
+        - '<tool file="data_source/biomart.xml" />'
+  # This lists the Tools Sheds available to galaxy and installls them
+  toolsheds:
+    Galaxy Main Tool Shed: "https://toolshed.g2.bx.psu.edu/"
+  # job_conf.xml customization for cluster configuration. e.g. LSF DRMAA
+  # Ful list of option- galaxy install dir>/config/job_conf.xml.conf
+  # This is just for example for use but Not Valid. You probably need to specify only few entries.
+  jobs:
+    enable: True # Enforce job_conf.xml customizion
+    handlers_default: handlers
+    destinations_default: local
+    resources_default: default
+    plugins:
+      dmraa:
+        type: "runner"
+        load: "galaxy.jobs.runners.drmaa:DRMAAJobRunner"
+        worker: 2
+        params: #(optional)
+          invalidjobexception_state: ok
+          invalidjobexception_retries: 0
+          drmaa_library_path: "/path/to/libdrmaa.so"
+    handlers:
+      handler0:                      # This will be handler id
+        tags: handlers
+        plugin: sge
+      trackster_handler:
+    destinations:
+      multicore_local:              # this will be destinations id
+        runner: local
+        params: #(optional)
+          local_slots: 4
+        env: # plain text xml string only
+          - '<env id="_JAVA_OPTIONS">-Xmx6G</env>'
+          - '<env file="path/to/clusetr/profile.lsf"/>'
+          - '<env file="/path/to/galaxy/.venv/bin/activate"/>'
+          - '<param id="nativeSpecification">-q inter -n 2</param>'
+        resubmit: #(optional)
+          walltime_reached:
+            destination: "long_slow"
+            handler: "sge_handler"
+    expand:                      # same level as destinations #(optional)
+      foo_small:
+        macro: "foohost_destination"
+        ncpus: "1"
+        walltime: "1:00:00"
+    resources:
+      deafult : ""                 # default is require is resources is defined
+      memoryonly: memory
+      all: "processors,memory,time,project"
+    tools:                         #(optional)
+      foo:                         # name of the tool
+        handler: "trackster_handler"
+        destination: "bigmem"
+        resource: all
+        params:                      #(optional)
+          source: trackster
+    limits:                         #(optional)
+      entry_1:                      # Entry name has no impact/use #(optional)
+        type: destination_user_concurrent_jobs
+        id: local
+        value: 2
+      entry_2:
+        type: destination_user_concurrent_jobs
+        tag: longjobs
+        value: 1
+      entry_3:
+        type: total_walltime
+        value: "24:00:00"
+        window: 30
+    macros:                      # Input each line as list entry #(optional)
+      - '<xml name="foohost_destination" tokens="id,walltime,ncpus">'
+      - '  <destination id="@ID@" runner="cli">'
+      - '    <param id="shell_plugin">SecureShell</param>'
+      - '    <param id="job_plugin">Torque</param>'
+      - '    <param id="shell_username">galaxy</param>'
+      - '    <param id="shell_hostname">foohost_destination.example.org</param>'
+      - '    <param id="job_Resource_List">walltime=@WALLTIME@,ncpus=@NCPUS@</param>'
+      - '    </destination>'
+      - '</xml>'
+
+
+
+## * check galaxy.defaults" for more pillar options *
+
+## For config options Check galaxy.ini.sample for full list
+## For auth options Check auth_conf.xml.sample for full list
+## For jobs options Check job_conf.xml.sample for full list

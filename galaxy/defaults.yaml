@@ -1,0 +1,90 @@
+# Galaxy defaults
+galaxy:
+  home: /srv/galaxyproject
+  home_url: 'https://usegalaxy.org/'
+  archive_url: 'https://github.com/galaxyproject/galaxy/archive/'
+  version: "17.09"
+  log_dir: "/var/log/galaxy"
+  user: #user attributes
+  # Addition apt/yum packages, default is on debian
+  system_packages:
+    {% if salt.grains.get('os_family') == "Debian" %}
+      - build-essential
+      - zlibc
+      - r-base
+      - r-base-dev
+      - pkg-config
+      - python-dev
+    {% elif salt.grains.get('os_family') == "Redhat" %} # not tested
+      - gcc
+      - make
+      - zlib
+      - zlib-devel
+      - glib
+      - glib-devel
+      - R
+      - python-devel
+    {% endif %}
+  # Update variables here if you want use your own python repo
+  venv:
+    index_url: "https://pypi.python.org/simple"
+    extra_index_url: "https://wheels.galaxyproject.org/simple" # do not useit under pip when using proxy
+    pip:
+      timeout: 60
+      index-url: "https://pypi.python.org/simple"
+      find-links: "https://wheels.galaxyproject.org/simple"
+  # Galaxy server configs
+  config:
+    server:
+      host: 0.0.0.0
+      port: 8080
+      use: "egg:Paste#http"
+    app:
+      admin_users: "toolinstaller@localhost.lan"
+      paste.app_factory: galaxy.web.buildapp:app_factory
+      auth_config_file: config/auth_conf.xml
+      use_interactive: True
+      debug: False
+      use_nglims: False
+      nglims_config_file: "tool-data/nglims.yaml"
+      conda_auto_init: True
+
+  # Galaxy Authentication sources
+  auth:
+    localdb:
+      enabled: True
+      allow_password_change: True
+    ldap:
+      enabled: False
+
+  # locally installed tools filter
+  localtools:
+
+  # This lists the Tools Sheds available to galaxy and installls them
+  toolsheds:
+    Galaxy Main Tool Shed: "https://toolshed.g2.bx.psu.edu/"
+
+  # if customise_localtools = True, it will filter Locally instaled tools in interface (it does not add new)
+  customise_localtools: False
+
+  # Jobs configuration, set enable: to true to activate
+  jobs:
+    enable: false
+    handlers_default: handlers
+    destinations_default: local
+    resources_default: default
+    resources:
+      deafult : "" # required
+      memoryonly: memory
+      all: "processors,memory,time,project"
+
+  # Install tools as part of galaxy installtation (This is a separate role-galaxy.toolinstaller)
+  tool_installer:
+    force_run: False
+    api_key: "abcdef0123456789abcdef0123456789"
+    galaxy_instance: "http://127.0.0.1:8080"
+    yaml_source: "https://raw.githubusercontent.com/galaxyproject/galaxy-cloudman-playbook/564bfab1f5dbfada58f5d82fc8dfded155cf5d40/files/usegalaxy_main_tool_list.yaml"
+    # yaml_source_hash: "md5=c75f7170316927776ca5f58e26e6ef9f" # it can be URL or string ( if undefined verification will be skipped)
+    user_name: "tool-installer"
+    user_password: {{ salt['grains.get']('machine_id') }}
+    user_email: "toolinstaller@localhost.lan" # Must be present in galaxy.config.app

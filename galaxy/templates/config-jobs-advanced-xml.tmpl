@@ -1,0 +1,97 @@
+{% from "galaxy/map.jinja" import galaxy with context -%}
+<?xml version="1.0"?>
+<job_conf>
+
+  <!-- plugin configuration -->
+  <plugins{% if galaxy.jobs.worker_defaults is defined -%} {{ galaxy.jobs.worker_defaults }}{% endif %}>
+    {% for pluginid, info in galaxy.jobs.plugins.iteritems() |reverse -%}
+    <plugin id="{{ pluginid }}" {% if info is defined %}{% for key, values in info.iteritems() |reverse %}{% if key != "params" %} {{ key }}="{{ values }}"{% endif %}{% endfor -%}{% endif %}>
+      {% if info.params is defined -%}{% for key, values in info.params.iteritems() |reverse -%}
+      <param id="{{ key }}">{{ values }}</param>
+      {% endfor -%}{%- endif -%}
+  </plugin>
+    {% endfor %}
+
+  </plugins>
+
+  <!-- handler configuration -->
+  <handlers default="{{ galaxy.jobs.handlers_default }}">
+    {% for handlid, info in galaxy.jobs.handlers.iteritems() |reverse -%}
+    <handler id="{{ handlid }}"{% if info.tags is defined -%}tags="{{ info.tags }}"{% endif %}>
+      {%- if info.plugin is defined %}
+      <plugin id="{{ info.plugin }}"/>
+      {% endif %}
+    </handler>
+    {% endfor %}
+
+  </handlers>
+
+  <!-- destination configuration -->
+  <destinations default="{{ galaxy.jobs.destinations_default }}">
+    {% for destid, info in galaxy.jobs.destinations.iteritems() |reverse -%}
+    <destination id="{{ destid }}" {% if info is defined %}{% for key, values in info.iteritems() |reverse %}{% if key != "params" and key != "env" and key != "resubmit" %} {{ key }}="{{ values }}"{% endif %}{% endfor -%}{% endif %}>
+      {% if info.params is defined -%}{% for key, values in info.params.iteritems() |reverse -%}
+      <param id="{{ key }}">{{ values }}</param>
+      {% endfor -%}{%- endif -%}
+      {% if info.env is defined -%}{% for data in info.env |reverse -%}
+      {{ data }}
+      {% endfor -%}{%- endif -%}
+      {% if info.resubmit is defined -%}{% for key, values in info.resubmit.iteritems() |reverse -%}
+      <resubmit condition="{{ key }}" {% if values is defined %}{% for value, data in values.iteritems() |reverse %} {{ value }}="{{ data }}"{% endfor -%}{% endif %}/>
+      {% endfor -%}{%- endif -%}
+    </destination>
+    {% endfor %}
+
+    {% if galaxy.jobs.expand is defined %}
+    <!-- expand configuration -->
+    {% for expid, info in galaxy.jobs.expand.iteritems() |reverse -%}
+    <expand id="{{ expid }}" {% for key, values in info.iteritems() |reverse %} {{ key }}="{{ values }}"{% endfor -%}/>
+    {% endfor %}
+    {% endif -%}
+
+  </destinations>
+
+  {% if galaxy.jobs.resources is defined %}
+  <!-- resources configuration -->
+  <resources default="{{ galaxy.jobs.resources_default }}">
+    {% for resourceid, data in galaxy.jobs.resources.iteritems() |reverse -%}
+    <group id="{{ resourceid }}">{{ data }}</group>"
+    {%- endfor %}
+
+  </resources>
+  {% endif -%}
+
+  {% if galaxy.jobs.tools is defined %}
+  <!-- tool configuration -->
+  <tools>
+    {% for toolid, info in galaxy.jobs.tools.iteritems() |reverse -%}
+    <tool id="{{ toolid }}" {% if info is defined %}{% for key, values in info.iteritems() |reverse %}{% if key != "params" %} {{ key }}="{{ values }}"{% endif %}{% endfor -%}{% endif %}>
+      {% if info.params is defined -%}{% for key, values in info.params.iteritems() |reverse -%}
+      <param id="{{ key }}">{{ values }}</param>
+      {% endfor -%}{%- endif -%}
+  </tool>
+    {%- endfor %}
+
+  </tools>
+  {% endif -%}
+
+  {% if galaxy.jobs.limits is defined %}
+  <!-- limits configuration -->
+  <limits>
+    {% for limitid, info in galaxy.jobs.limits.iteritems() |reverse -%}
+    <limit type="{{ info.type }}" {% for key, data in info.iteritems() %}{% if key != "type" and key != "value" %} {{ key }}="{{ data }}"{% endif %}{% endfor -%}
+      >{{ info.value }}</limit>
+    {% endfor %}
+  </limits>
+  {% endif -%}
+
+  {% if galaxy.jobs.macros is defined %}
+  <!-- macros configuration -->
+  <macros>
+    {% for macrosdata in galaxy.jobs.macros -%}
+    {{ macrosdata }}
+    {% endfor %}
+  </macros>
+  {% endif -%}
+
+</job_conf>

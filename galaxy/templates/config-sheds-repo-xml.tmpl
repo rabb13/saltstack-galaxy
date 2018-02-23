@@ -1,0 +1,10 @@
+{%- from "galaxy/map.jinja" import galaxy with context -%}
+<?xml version="1.0"?>
+
+<!-- Managed by Salt -->
+
+<tool_sheds>
+ {% for key, value in galaxy.toolsheds.iteritems() -%}
+  <tool_shed name="{{ key }}" url="{{ value }}"/>
+ {% endfor %}
+</tool_sheds>

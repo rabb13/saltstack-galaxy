@@ -1,0 +1,29 @@
+{%- from "galaxy/map.jinja" import galaxy with context -%}
+<?xml version="1.0"?>
+
+<!-- Managed by Salt -->
+
+<auth>
+{% if galaxy.auth.ldap.enabled == true -%}
+<!-- LDAP configuration, type: {{ galaxy.auth.ldap.options.ldap_type }} -->
+<authenticator>
+    <type>ldap</type>
+    <filter>{{ galaxy.auth.ldap.filter }}</filter>
+    <options>
+      {% for key, value in galaxy.auth.ldap.options.iteritems() -%}
+      <{{ key }}>{{ value }}</{{ key }}>
+      {% endfor -%}
+    </options>
+</authenticator>
+{% endif %}
+
+{% if galaxy.auth.localdb.enabled == true -%}
+<!-- localdb configuration -->
+<authenticator>
+<type>localdb</type>
+<options>
+<allow-password-change>{{ galaxy.auth.localdb.allow_password_change }}</allow-password-change>
+</options>
+</authenticator>
+{% endif -%}
+</auth>

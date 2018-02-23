@@ -1,0 +1,71 @@
+{%- from "galaxy/map.jinja" import galaxy with context -%}
+{%- set local_tools = galaxy.localtools -%}
+<?xml version='1.0' encoding='utf-8'?>
+
+<!-- Managed by Salt -->
+
+<toolbox monitor="true">
+  {%- if galaxy.localtools.getext is defined %}
+    <section id="getext" name="Get Data">
+      {% for value in local_tools.getext.tools -%}
+      {{ value }}
+      {% endfor %}
+    </section>
+  {% endif -%}
+  {%- if galaxy.localtools.liftOver is defined %}
+    <section id="liftOver" name="Lift-Over">
+      {% for value in local_tools.liftOver.tools  -%}
+      {{ value }}
+      {% endfor %}
+    </section>
+  {% endif -%}
+  {%- if galaxy.localtools.collection_operations is defined %}
+    <section id="collection_operations" name="Collection Operations">
+      {% for value in local_tools.collection_operations.tools  -%}
+      {{ value }}
+      {% endfor %}
+    </section>
+  {% endif -%}
+  {%- if galaxy.localtools.textutil is defined %}
+    <section id="textutil" name="Collection Operations">
+      {% for value in local_tools.textutil.tools -%}
+      {{ value }}
+      {% endfor %}
+    </section>
+  {% endif -%}
+  {%- if galaxy.localtools.filter is defined %}
+    <section id="filter" name="Filter and Sort">
+      {% for value in local_tools.filter.tools -%}
+      {{ value }}
+      {% endfor %}
+    </section>
+  {% endif -%}
+  {%- if galaxy.localtools.convert is defined %}
+    <section id="convert" name="Convert Formats">
+      {% for value in local_tools.convert.tools -%}
+      {{ value }}
+      {% endfor %}
+    </section>
+  {% endif -%}
+  {%- if galaxy.localtools.plots is defined %}
+    <section id="plots" name="Graph/Display Data">
+      {% for value in local_tools.plots.tools -%}
+      {{ value }}
+      {% endfor %}
+    </section>
+  {% endif -%}
+  {%- if galaxy.localtools.stats is defined %}
+    <section id="stats" name="Statistics">
+      {% for value in local_tools.stats.tools -%}
+      {{ value }}
+      {% endfor %}
+    </section>
+  {% endif -%}
+  {%- if galaxy.localtools.cshl_library_information is defined %}
+    <section id="cshl_library_information" name="GS: QC and manipulation">
+      {% for value in local_tools.cshl_library_information.tools -%}
+      {{ value }}
+      {% endfor %}
+    </section>
+  {% endif -%}
+</toolbox>

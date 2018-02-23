@@ -1,0 +1,6 @@
+# Managed by salt
+{% from "galaxy/map.jinja" import galaxy with context -%}
+[global]
+{% for key, value in galaxy.venv.pip.iteritems() -%}
+{{ key }} = {{ value }}
+{% endfor -%}

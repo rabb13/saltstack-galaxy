@@ -1,0 +1,39 @@
+# Managed by salt
+{% from "galaxy/map.jinja" import galaxy with context %}
+
+# ---- HTTP Server ----------------------------------------------------------
+[server:main]
+{% if galaxy.config.server is defined -%}
+{% for key, value in galaxy.config.server.iteritems() -%}
+{{ key }} = {{ value }}
+{% endfor -%}
+{% endif %}
+
+# ---- Galaxy ---------------------------------------------------------------
+{% if galaxy.config.app is defined -%}
+[app:main]
+{% for key, value in  galaxy.config.app.iteritems() -%}
+{{ key }} = {{ value }}
+{% endfor -%}
+{% endif %}
+
+# ---- Filters --------------------------------------------------------------
+# Filters sit between Galaxy and the HTTP server, disabled by default.
+# Can be enabled with 'filter-with' in the [app:main] section.
+
+# Define the gzip filter.
+[filter:gzip]
+use = egg:Paste#gzip
+
+# Define the proxy-prefix filter.
+[filter:proxy-prefix]
+use = egg:PasteDeploy#prefix
+prefix = /galaxy
+
+# ---- Galaxy External Message Queue -------------------------------------------------
+{% if galaxy.config.amqp is defined -%}
+[galaxy_amqp]
+{% for key, value in  galaxy.config.amqp.iteritems() -%}
+{{ key }} = {{ value }}
+{% endfor -%}
+{% endif %}
