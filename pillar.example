@@ -15,7 +15,7 @@ roles:
 galaxy:
   home: /srv/galaxyproject
   archive_url: 'https://github.com/galaxyproject/galaxy/archive/'
-  version: "17.09"
+  version: "18.01"
   log_dir: "/var/log/galaxy"
   source_profile: "/path/to/activate" # Usefull for load cluster profiles
   user: # optional, usefull when matching with cluser
@@ -31,7 +31,9 @@ galaxy:
       find-links: "https://wheels.galaxyproject.org/simple"
   # Galaxy server configs
   config:
-    server:
+    uwsgi:                     # This section applies to version 18.01 or higher
+      http: "0.0.0.0:8080"
+    server:                    # This section applies to version 17.09 or lower
       host: 0.0.0.0
       port: 8080
     app:

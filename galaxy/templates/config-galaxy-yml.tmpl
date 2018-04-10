@@ -1,0 +1,17 @@
+{% from "galaxy/map.jinja" import galaxy with context %}
+# Managed by salt
+# Compatible with galaxy version 18.01 or higher
+
+# ---- uWSGI (web and application) Server ----------------------------------------------------------
+uwsgi:
+{% for key, value in galaxy.config.uwsgi.iteritems() %}
+  {{ key }}: {{ value }}
+{% endfor %}
+
+  static-map: /static=static
+
+# ---- Galaxy ---------------------------------------------------------------
+galaxy:
+{% for key, value in  galaxy.config.app.iteritems() %}
+  {{ key }}: {{ value }}
+{% endfor -%}

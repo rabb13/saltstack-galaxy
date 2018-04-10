@@ -3,7 +3,7 @@ galaxy:
   home: /srv/galaxyproject
   home_url: 'https://usegalaxy.org/'
   archive_url: 'https://github.com/galaxyproject/galaxy/archive/'
-  version: "17.09"
+  version: "18.01"
   log_dir: "/var/log/galaxy"
   user: #user attributes
   # Addition apt/yum packages, default is on debian
@@ -35,18 +35,29 @@ galaxy:
       find-links: "https://wheels.galaxyproject.org/simple"
   # Galaxy server configs
   config:
+    #----------- For version 18.01 or later   ---------#
+    uwsgi:
+      http: "0.0.0.0:8080"
+      processes: 1
+      threads: 4
+      offload-threads: 2
+      master: true
+      virtualenv: ".venv"
+      module: galaxy.webapps.galaxy.buildapp:uwsgi_app()
+      die-on-term: true
+      py-call-osafterfork: true
+      enable-threads: true
+    #----------- For version 17.09 or earlier ---------#
     server:
       host: 0.0.0.0
       port: 8080
       use: "egg:Paste#http"
+    #--------------------------------------------------#
     app:
       admin_users: "toolinstaller@localhost.lan"
-      paste.app_factory: galaxy.web.buildapp:app_factory
       auth_config_file: config/auth_conf.xml
       use_interactive: True
       debug: False
-      use_nglims: False
-      nglims_config_file: "tool-data/nglims.yaml"
       conda_auto_init: True
 
   # Galaxy Authentication sources

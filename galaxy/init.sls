@@ -1,7 +1,8 @@
 {% from "galaxy/map.jinja" import galaxy with context %}
 
-/etc/environment:
+galaxy-global-environment:
   file.append:
+    - name: "/etc/environment"
     - text:
       - galaxy_home={{ galaxy.home }}
       - galaxy_dir=$galaxy_home/galaxy
@@ -51,8 +52,13 @@ galaxy-app-symlink:
 galaxy-app-config:
   file.managed:
     - template: jinja
+    {% if galaxy.version < 18.01 -%}
     - name: '{{ galaxy.home }}/galaxy/config/galaxy.ini'
     - source: salt://galaxy/templates/config-galaxy-ini.tmpl
+    {% else %}
+    - name: '{{ galaxy.home }}/galaxy/config/galaxy.yml'
+    - source: salt://galaxy/templates/config-galaxy-yml.tmpl
+    {% endif %}
     - user: galaxy
     - group: galaxy
 
