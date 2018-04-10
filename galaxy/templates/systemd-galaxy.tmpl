@@ -7,8 +7,7 @@ Description=Galaxy Service
 After=network.target postgresql.service
 {% else -%}
 After=network.target
-{% endif -%}
-
+{% endif %}
 
 [Service]
 Type=forking
@@ -19,9 +18,14 @@ WorkingDirectory={{ galaxy.home }}/galaxy
 {% if galaxy.source_profile is defined -%}
 ExecStartPre=source {{ galaxy.source_profile }}
 {% endif -%}
+{% if galaxy.version < 18.00 -%}
 ExecStartPre=-{{ galaxy.home }}/galaxy/run.sh --status
 ExecStart=/bin/bash -c 'source {{ galaxy.home }}/galaxy/.venv/bin/activate; /{{ galaxy.home }}/galaxy/.venv/bin/python {{ galaxy.home }}/galaxy/scripts/paster.py serve "{{ galaxy.home }}/galaxy/config/galaxy.ini" --pid-file="/var/run/galaxy/galaxy.pid" --log-file="{{ galaxy.log_dir }}/galaxy.log" --daemon'
 ExecStop={{ galaxy.home }}/galaxy/.venv/bin/python ./scripts/paster.py serve "config/galaxy.ini" --pid-file="/var/run/galaxy/galaxy.pid" --log-file="{{ galaxy.log_dir }}/galaxy.log" --stop-daemon
+{% elif galaxy.version >= 18.01  %}
+ExecStart={{ galaxy.home }}/galaxy/run.sh --daemon --daemonize2 {{ galaxy.log_dir }}/galaxy.log --pidfile2 /var/run/galaxy/galaxy.pid
+ExecStop={{ galaxy.home }}/galaxy/run.sh --stop-daemon
+{% endif %}
 PIDFile=/var/run/galaxy/galaxy.pid
 TimeoutSec=300
 

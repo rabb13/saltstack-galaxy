@@ -1,4 +1,5 @@
 # Managed by salt
+# Compatible with galaxy version 17.09 or lower
 {% from "galaxy/map.jinja" import galaxy with context %}
 
 # ---- HTTP Server ----------------------------------------------------------
@@ -17,7 +18,14 @@
 {% endfor -%}
 {% endif %}
 
-# ---- Filters --------------------------------------------------------------
+# ---- Other fixed app config --------------------------------------------------------------
+# The factory for the WSGI application.  This should not be changed.
+paste.app_factory = galaxy.web.buildapp:app_factory
+
+# management code
+use_nglims = False
+nglims_config_file = tool-data/nglims.yaml
+
 # Filters sit between Galaxy and the HTTP server, disabled by default.
 # Can be enabled with 'filter-with' in the [app:main] section.
 
