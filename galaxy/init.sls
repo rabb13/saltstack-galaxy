@@ -52,7 +52,7 @@ galaxy-app-symlink:
 galaxy-app-config:
   file.managed:
     - template: jinja
-    {% if galaxy.version < 18.01 -%}
+    {% if galaxy.version|float < 18.01 -%}
     - name: '{{ galaxy.home }}/galaxy/config/galaxy.ini'
     - source: salt://galaxy/templates/config-galaxy-ini.tmpl
     {% else %}
